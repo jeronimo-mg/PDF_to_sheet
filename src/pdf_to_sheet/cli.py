@@ -30,16 +30,42 @@ def setup_logging(log_dir: str = "logs") -> str:
     return log_file
 
 
+def open_file_dialog() -> str | None:
+    """Open a native GUI file picker for PDF selection."""
+    try:
+        import tkinter as tk
+        from tkinter import filedialog
+
+        root = tk.Tk()
+        root.withdraw()
+        root.attributes("-topmost", True)
+        file_path = filedialog.askopenfilename(
+            title="Selecione o arquivo PDF para converter",
+            filetypes=[("Arquivos PDF", "*.pdf"), ("Todos os arquivos", "*.*")],
+        )
+        root.destroy()
+        return file_path if file_path else None
+    except Exception as exc:  # noqa: BLE001
+        logger.error("Failed to open GUI file dialog: %s", exc)
+        return None
+
+
 @click.command()
 @click.option("--file", "-f", "pdf_file", type=click.Path(exists=True), help="Path to a single input PDF file.")
 @click.option("--dir", "-d", "pdf_dir", type=click.Path(exists=True), help="Path to directory containing PDF files for batch processing.")
 @click.option("--output", "-o", "output_path", type=click.Path(), help="Output XLSX file path or directory.")
+@click.option("--gui", is_flag=True, help="Open native Windows GUI file selection dialog.")
 @click.option("--ollama-host", default="http://localhost:11434", help="Host URL for local Ollama service.")
-def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, ollama_host: str) -> None:
+def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, gui: bool, ollama_host: str) -> None:
     """Convert PDF tables into Excel XLSX spreadsheets with hybrid rule-based and local AI vision extraction."""
-    if not pdf_file and not pdf_dir:
-        console.print("[bold red]Error:[/bold red] You must provide either --file (-f) or --dir (-d). Use --help for details.")
-        sys.exit(1)
+    if gui or (not pdf_file and not pdf_dir):
+        selected = open_file_dialog()
+        if selected:
+            pdf_file = selected
+        else:
+            if not pdf_file and not pdf_dir:
+                console.print("[yellow]Nenhum arquivo PDF foi selecionado.[/yellow]")
+                sys.exit(0)
 
     log_file = setup_logging()
     logger.info("CLI execution started. File=%s, Dir=%s", pdf_file, pdf_dir)
@@ -89,6 +115,13 @@ def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, oll
                 writer.write(result, dest_xlsx)
                 logger.info("Successfully converted %s -> %s (%d tables)", pdf_path, dest_xlsx, len(result.tables))
                 console.print(f" [bold green][OK][/bold green] Converted: [bold]{filename}[/bold] -> [cyan]{dest_xlsx}[/cyan] ({len(result.tables)} table(s))")
+
+                # Auto-open generated spreadsheet on Windows when run interactively
+                if hasattr(os, "startfile") and (gui or len(pdf_files) == 1):
+                    try:
+                        os.startfile(os.path.abspath(dest_xlsx))
+                    except Exception as exc:  # noqa: BLE001
+                        logger.warning("Could not auto-open spreadsheet: %s", exc)
             else:
                 logger.warning("Failed to extract tables from %s. Warnings: %s", pdf_path, result.warnings)
                 console.print(f" [bold red][WARN][/bold red] Warnings for [bold]{filename}[/bold]: {', '.join(result.warnings)}")

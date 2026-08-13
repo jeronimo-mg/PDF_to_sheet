@@ -156,14 +156,18 @@ def merge_adjacent_item_rows(rows: list[list[str]], num_cols: int) -> list[list[
             tag_curr = current_row[2].strip() if len(current_row) > 2 else ""
             tag_next = row[2].strip() if len(row) > 2 else ""
 
-            # Check if this row is a continuation of current_row
-            has_new_tag = bool(tag_curr and tag_next and tag_curr != tag_next)
-            if not has_new_tag:
+            # Continuation row has no TAG or matching TAG
+            is_continuation = not tag_next or (tag_curr != "" and tag_next == tag_curr)
+
+            if is_continuation:
                 for col_idx in range(min(len(row), num_cols)):
-                    if not current_row[col_idx] and row[col_idx]:
-                        current_row[col_idx] = row[col_idx]
-                    elif current_row[col_idx] and row[col_idx] and current_row[col_idx] != row[col_idx] and col_idx >= num_cols - 2:
-                        current_row[col_idx] += "\n" + row[col_idx]
+                    val_curr = current_row[col_idx].strip()
+                    val_next = row[col_idx].strip()
+
+                    if not val_curr and val_next:
+                        current_row[col_idx] = val_next
+                    elif val_curr and val_next and val_curr != val_next and col_idx not in [0, 2] and val_next not in val_curr:
+                        current_row[col_idx] = f"{val_curr}\n{val_next}"
                 continue
 
         current_row = list(row)

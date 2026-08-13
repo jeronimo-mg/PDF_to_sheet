@@ -1,0 +1,8 @@
+{
+  "track_id": "li_fluxograma_coord_multiline_fix_20260813",
+  "type": "bug_fix",
+  "status": "completed",
+  "created_at": "2026-08-13T14:27:50Z",
+  "updated_at": "2026-08-13T14:27:50Z",
+  "description": "Correção de mesclagem multi-linha para coordenadas e fluxogramas na coluna FLUXOGRAMA/COORD"
+}

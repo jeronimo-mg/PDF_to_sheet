@@ -75,7 +75,7 @@ class ExcelWriter:
             for col in ws.columns:
                 max_len = max(len(str(cell.value or "")) for cell in col)
                 col_letter = get_column_letter(col[0].column)
-                ws.column_dimensions[col_letter].width = max(max_len + 4, 12)
+                ws.column_dimensions[col_letter].width = min(max(max_len + 3, 10), 45)
 
             for row_idx, row_cells in enumerate(ws.iter_rows(), start=1):
                 for cell in row_cells:
@@ -83,7 +83,9 @@ class ExcelWriter:
                     if row_idx == 1 and table.headers:
                         cell.font = header_font
                         cell.fill = header_fill
-                        cell.alignment = Alignment(horizontal="center", vertical="center")
+                        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                    else:
+                        cell.alignment = Alignment(vertical="top", wrap_text=True)
 
         # 2. Master Consolidated Sheet
         if all_rows:
@@ -96,7 +98,7 @@ class ExcelWriter:
             for col in ws_master.columns:
                 max_len = max(len(str(cell.value or "")) for cell in col)
                 col_letter = get_column_letter(col[0].column)
-                ws_master.column_dimensions[col_letter].width = max(max_len + 4, 12)
+                ws_master.column_dimensions[col_letter].width = min(max(max_len + 3, 10), 45)
 
             for row_idx, row_cells in enumerate(ws_master.iter_rows(), start=1):
                 for cell in row_cells:
@@ -104,7 +106,9 @@ class ExcelWriter:
                     if row_idx == 1 and master_headers:
                         cell.font = header_font
                         cell.fill = header_fill
-                        cell.alignment = Alignment(horizontal="center", vertical="center")
+                        cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+                    else:
+                        cell.alignment = Alignment(vertical="top", wrap_text=True)
 
         wb.save(output_path)
         return output_path

@@ -94,7 +94,48 @@ def clean_raw_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], l
         if any(cell_text != "" for cell_text in cleaned_row):
             data_rows.append(cleaned_row)
 
-    return headers, data_rows
+    return sanitize_table_rows(headers, data_rows)
+
+
+def sanitize_table_rows(headers: list[str], rows: list[list[str]]) -> tuple[list[str], list[list[str]]]:
+    """Sanitize table headers and rows: drop trailing empty headers, fix cell 0 artifacts, propagate TAGs to subrows."""
+    clean_headers = list(headers)
+    while clean_headers and not clean_headers[-1].strip():
+        clean_headers.pop()
+
+    if not clean_headers or not rows:
+        return clean_headers, []
+
+    sanitized_rows: list[list[str]] = []
+    last_rev = "1"
+    last_tag = ""
+
+    for row in rows:
+        r = list(row[: len(clean_headers)])
+        while len(r) < len(clean_headers):
+            r.append("")
+
+        # 1. Fix cell 0 (Rev.) corruptions/artifacts
+        rev_val = r[0].strip() if len(r) > 0 else ""
+        if len(rev_val) > 10 or "FILTRO" in rev_val or "TROC" in rev_val:
+            r[0] = last_rev
+        elif rev_val:
+            last_rev = rev_val
+        else:
+            r[0] = last_rev
+
+        # 2. TAG propagation for sub-rows (e.g. (CASCO))
+        tag_col_idx = 2  # Default TAG index for LE/LI tables
+        if len(r) > tag_col_idx:
+            current_tag = r[tag_col_idx].strip()
+            if current_tag:
+                last_tag = current_tag
+            elif len(r) > 1 and r[1] and "(CASCO)" in r[1]:
+                r[tag_col_idx] = f"{last_tag} (CASCO)" if last_tag else "(CASCO)"
+
+        sanitized_rows.append(r)
+
+    return clean_headers, sanitized_rows
 
 
 def is_technical_data_table(table: Any) -> bool:

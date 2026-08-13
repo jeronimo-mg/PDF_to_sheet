@@ -1,0 +1,8 @@
+{
+  "track_id": "pdf_table_extractor_20260813",
+  "type": "feature",
+  "status": "new",
+  "created_at": "2026-08-13T10:56:20Z",
+  "updated_at": "2026-08-13T10:56:20Z",
+  "description": "Develop PDF to XLSX Table Extractor CLI with Hybrid Local Parsing"
+}

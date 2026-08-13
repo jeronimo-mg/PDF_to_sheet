@@ -1,0 +1,8 @@
+{
+  "track_id": "refine_table_extraction_20260813",
+  "type": "enhancement",
+  "status": "new",
+  "created_at": "2026-08-13T11:32:00Z",
+  "updated_at": "2026-08-13T11:32:00Z",
+  "description": "Refinar extração de tabelas LE/LI com fusão de cabeçalhos multi-linha e filtro de capa"
+}

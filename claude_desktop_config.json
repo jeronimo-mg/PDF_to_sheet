@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "pdf-to-sheet": {
+      "command": "python",
+      "args": [
+        "-m",
+        "pdf_to_sheet.mcp_server"
+      ],
+      "env": {
+        "OLLAMA_HOST": "http://localhost:11434"
+      }
+    }
+  }
+}

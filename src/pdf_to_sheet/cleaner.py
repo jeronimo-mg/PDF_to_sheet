@@ -34,6 +34,52 @@ def is_footer_or_metadata_row(row: list[str | None]) -> bool:
     return False
 
 
+def preprocess_mixed_header_data_rows(raw_rows: list[list[str | None]]) -> list[list[str | None]]:
+    """Detect and split rows where sub-header keywords (SISTEMA, INSTRUM., MEC, ELE) are mixed with data values."""
+    new_rows: list[list[str | None]] = []
+
+    for row in raw_rows:
+        has_mixed = False
+        header_part: list[str | None] = [None] * len(row)
+        data_part: list[str | None] = [None] * len(row)
+
+        for i, cell in enumerate(row):
+            if not cell:
+                continue
+            text = str(cell).strip()
+
+            if "SISTEMA" in text and text != "SISTEMA":
+                header_part[i] = "SISTEMA"
+                data_part[i] = text.replace("SISTEMA", "").strip()
+                has_mixed = True
+            elif "INSTRUM." in text and text != "INSTRUM.":
+                header_part[i] = "INSTRUM."
+                data_part[i] = text.replace("INSTRUM.", "").strip()
+                has_mixed = True
+            elif "MEC" in text and len(text) > 3 and text.startswith("MEC"):
+                header_part[i] = "MEC"
+                data_part[i] = text.replace("MEC", "").strip()
+                has_mixed = True
+            elif "ELE" in text and len(text) > 3 and text.startswith("ELE"):
+                header_part[i] = "ELE"
+                data_part[i] = text.replace("ELE", "").strip()
+                has_mixed = True
+            elif text in ["SISTEMA", "INSTRUM.", "MEC", "ELE"]:
+                header_part[i] = text
+            else:
+                data_part[i] = text
+
+        if has_mixed:
+            if any(h for h in header_part if h):
+                new_rows.append(header_part)
+            if any(d for d in data_part if d):
+                new_rows.append(data_part)
+        else:
+            new_rows.append(row)
+
+    return new_rows
+
+
 def merge_multiline_headers(rows: list[list[str | None]]) -> tuple[list[str], int]:
     """Detect if table has a 2-row split header and merge it vertically into a single list of column names."""
     if not rows:
@@ -46,11 +92,11 @@ def merge_multiline_headers(rows: list[list[str | None]]) -> tuple[list[str], in
     r0 = [clean_cell_text(c) for c in rows[0]]
     r1 = [clean_cell_text(c) for c in rows[1]]
 
-    # Check if r1 looks like a sub-header row (e.g. contains 'Equipamento', 'Número (TAG)', etc. while r0 has empty/None in those positions)
-    sub_header_indicators = ["equipamento", "número", "tag", "dimensões", "peso", "operacionais", "status", "book"]
-    has_sub_headers = any(any(ind in c.lower() for ind in sub_header_indicators) for c in r1 if c)
+    sub_header_indicators = ["equipamento", "número", "tag", "dimensões", "peso", "operacionais", "status", "book", "sistema", "instrum", "linha", "coord"]
+    is_r1_subheader = any(any(ind in c.lower() for ind in sub_header_indicators) for c in r1 if c)
+    is_r1_data = r1[0].strip() in ["0", "1", "2", "3", "4", "5"] or any("DZ-" in c or "P-" in c for c in r1 if c)
 
-    if has_sub_headers:
+    if is_r1_subheader and not is_r1_data:
         merged_headers: list[str] = []
         max_cols = max(len(r0), len(r1))
         for i in range(max_cols):
@@ -60,26 +106,26 @@ def merge_multiline_headers(rows: list[list[str | None]]) -> tuple[list[str], in
             parts = []
             if c0:
                 parts.append(c0)
-            if c1:
+            if c1 and c1 not in parts:
                 parts.append(c1)
 
             merged_headers.append(" / ".join(parts) if parts else "")
 
         return merged_headers, 2
 
-    # Single-row header fallback
     return r0, 1
 
 
 def clean_raw_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], list[list[str]]]:
-    """Clean raw table rows: merge headers, strip linebreaks, and filter out footer rows."""
+    """Clean raw table rows: preprocess mixed headers, merge multi-line headers, strip linebreaks, and filter footers."""
     if not raw_rows:
         return [], []
 
-    headers, data_start_idx = merge_multiline_headers(raw_rows)
+    preprocessed_rows = preprocess_mixed_header_data_rows(raw_rows)
+    headers, data_start_idx = merge_multiline_headers(preprocessed_rows)
     data_rows: list[list[str]] = []
 
-    for r in raw_rows[data_start_idx:]:
+    for r in preprocessed_rows[data_start_idx:]:
         if is_footer_or_metadata_row(r):
             continue
 
@@ -95,6 +141,37 @@ def clean_raw_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], l
             data_rows.append(cleaned_row)
 
     return sanitize_table_rows(headers, data_rows)
+
+
+def merge_adjacent_item_rows(rows: list[list[str]], num_cols: int) -> list[list[str]]:
+    """Merge sparse adjacent sub-rows for the same item/equipment into a single consolidated row."""
+    if not rows:
+        return []
+
+    merged: list[list[str]] = []
+    current_row: list[str] | None = None
+
+    for row in rows:
+        rev = row[0].strip() if len(row) > 0 else ""
+        if current_row and (not rev or rev == current_row[0]):
+            # Check if combining fills empty slots in current_row
+            can_merge = False
+            for col_idx in range(min(len(row), num_cols)):
+                if not current_row[col_idx] and row[col_idx]:
+                    can_merge = True
+                    break
+            if can_merge:
+                for col_idx in range(min(len(row), num_cols)):
+                    if not current_row[col_idx] and row[col_idx]:
+                        current_row[col_idx] = row[col_idx]
+                    elif current_row[col_idx] and row[col_idx] and current_row[col_idx] != row[col_idx] and col_idx >= num_cols - 2:
+                        current_row[col_idx] += " " + row[col_idx]
+                continue
+
+        current_row = list(row)
+        merged.append(current_row)
+
+    return merged
 
 
 def sanitize_table_rows(headers: list[str], rows: list[list[str]]) -> tuple[list[str], list[list[str]]]:
@@ -135,7 +212,10 @@ def sanitize_table_rows(headers: list[str], rows: list[list[str]]) -> tuple[list
 
         sanitized_rows.append(r)
 
-    return clean_headers, sanitized_rows
+    # 3. Merge adjacent sparse item sub-rows into single consolidated rows
+    consolidated_rows = merge_adjacent_item_rows(sanitized_rows, len(clean_headers))
+
+    return clean_headers, consolidated_rows
 
 
 def is_technical_data_table(table: Any) -> bool:
@@ -146,14 +226,14 @@ def is_technical_data_table(table: Any) -> bool:
 
     header_text = " ".join(str(h) for h in headers).lower()
 
-    # Exclude cover page revision matrices
+    # Exclude cover page revision matrices & cover metadata
     if "situação da revisão" in header_text or "revisão de cada folha" in header_text:
         return False
     if "documentos de referência" in header_text and len(headers) < 4:
         return False
 
     # Positive signals for technical LE/LI data tables
-    technical_keywords = ["tag", "equipamento", "instrumento", "serviço", "tipo", "pressão", "desenho", "número", "rev."]
+    technical_keywords = ["tag", "equipamento", "instrumento", "serviço", "tipo", "pressão", "desenho", "número", "rev.", "qty", "descricao"]
     signal_count = sum(1 for kw in technical_keywords if kw in header_text)
 
     return signal_count >= 1

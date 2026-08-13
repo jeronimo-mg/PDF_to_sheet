@@ -7,6 +7,7 @@ import openpyxl
 from openpyxl.styles import Alignment, Border, Font, PatternFill, Side
 from openpyxl.utils import get_column_letter
 
+from pdf_to_sheet.cleaner import is_technical_data_table
 from pdf_to_sheet.models import ExtractionResult
 
 
@@ -55,18 +56,20 @@ class ExcelWriter:
 
         # 1. Individual Table Sheets
         for idx, table in enumerate(result.tables, start=1):
-            sheet_title = f"Table_{idx}_Page_{table.page_number}"[:31]
+            is_tech = is_technical_data_table(table)
+            sheet_title = f"Table_{idx}_Page_{table.page_number}"[:31] if is_tech else f"Metadata_Page_{table.page_number}"[:31]
             ws = wb.create_sheet(title=sheet_title)
 
             if table.headers:
                 ws.append(table.headers)
-                if not master_headers:
+                if is_tech and not master_headers:
                     master_headers = list(table.headers)
 
             for row in table.rows:
                 typed_row = [infer_type(cell) for cell in row]
                 ws.append(typed_row)
-                all_rows.append(typed_row)
+                if is_tech:
+                    all_rows.append(typed_row)
 
             # Apply formatting
             for col in ws.columns:

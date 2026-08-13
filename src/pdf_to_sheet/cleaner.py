@@ -152,20 +152,18 @@ def merge_adjacent_item_rows(rows: list[list[str]], num_cols: int) -> list[list[
     current_row: list[str] | None = None
 
     for row in rows:
-        rev = row[0].strip() if len(row) > 0 else ""
-        if current_row and (not rev or rev == current_row[0]):
-            # Check if combining fills empty slots in current_row
-            can_merge = False
-            for col_idx in range(min(len(row), num_cols)):
-                if not current_row[col_idx] and row[col_idx]:
-                    can_merge = True
-                    break
-            if can_merge:
+        if current_row:
+            tag_curr = current_row[2].strip() if len(current_row) > 2 else ""
+            tag_next = row[2].strip() if len(row) > 2 else ""
+
+            # Check if this row is a continuation of current_row
+            has_new_tag = bool(tag_curr and tag_next and tag_curr != tag_next)
+            if not has_new_tag:
                 for col_idx in range(min(len(row), num_cols)):
                     if not current_row[col_idx] and row[col_idx]:
                         current_row[col_idx] = row[col_idx]
                     elif current_row[col_idx] and row[col_idx] and current_row[col_idx] != row[col_idx] and col_idx >= num_cols - 2:
-                        current_row[col_idx] += " " + row[col_idx]
+                        current_row[col_idx] += "\n" + row[col_idx]
                 continue
 
         current_row = list(row)

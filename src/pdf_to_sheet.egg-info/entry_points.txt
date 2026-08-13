@@ -1,0 +1,2 @@
+[console_scripts]
+pdf-to-sheet = pdf_to_sheet.cli:main

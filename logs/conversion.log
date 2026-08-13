@@ -1,0 +1,6 @@
+2026-08-13 11:00:38,910 [INFO] CLI execution started. File=R11.01-2151-LE-0001_2.pdf, Dir=None
+2026-08-13 11:00:39,489 [INFO] Successfully converted R11.01-2151-LE-0001_2.pdf -> LE_output.xlsx (3 tables)
+2026-08-13 11:00:47,711 [INFO] CLI execution started. File=R11.01-2151-LE-0001_2.pdf, Dir=None
+2026-08-13 11:00:48,289 [INFO] Successfully converted R11.01-2151-LE-0001_2.pdf -> LE_output.xlsx (3 tables)
+2026-08-13 11:00:53,248 [INFO] CLI execution started. File=R11.01-2151-LI-0001_3-1.pdf, Dir=None
+2026-08-13 11:01:06,678 [INFO] Successfully converted R11.01-2151-LI-0001_3-1.pdf -> LI_output.xlsx (15 tables)

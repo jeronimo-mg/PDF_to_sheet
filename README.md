@@ -87,12 +87,16 @@ pdf-to-sheet -f extrato.pdf --profile generic
 pdf-to-sheet -f R11.01-2151-LE-0001_2.pdf --profile le_li
 ```
 
-### 4. Modo Interface Gráfica (GUI)
-Para abrir a janela nativa do Windows e escolher o arquivo visualmente:
-```bash
-pdf-to-sheet --gui
-```
-> 💡 **Dica no Windows**: Você também pode simplesmente dar um **duplo clique no arquivo `Converter_PDF_para_Excel.bat`** na raiz do projeto.
+### 4. Modo Interface Gráfica (GUI) & Executável Independente (.exe)
+Você pode executar a conversão visual no Windows sem precisar de comandos no terminal:
+
+* 📦 **Executável Independente (`.exe`)**:
+  Localizado em `dist/Converter_PDF_para_Excel.exe`. Pode ser copiado e executado em qualquer computador com Windows, sem necessidade de instalar o Python!
+  ```cmd
+  dist\Converter_PDF_para_Excel.exe --gui
+  ```
+* ⚡ **Atalho via Arquivo Bat**:
+  Basta dar um **duplo clique no arquivo `Converter_PDF_para_Excel.bat`** na raiz do projeto. Ele detectará o executável automaticamente e abrirá a caixa de seleção de arquivo.
 
 ---
 

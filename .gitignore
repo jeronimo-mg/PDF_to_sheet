@@ -1,0 +1,23 @@
+# Python bytecode
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+.venv/
+env/
+venv/
+
+# PyInstaller / Build outputs
+build/
+*.spec
+
+# Logs & temp outputs
+logs/
+*.xlsx
+!LE_output.xlsx
+!LI_output.xlsx
+
+# IDE & OS files
+.vscode/
+.idea/
+.DS_Store

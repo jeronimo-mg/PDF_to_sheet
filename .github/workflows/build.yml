@@ -1,0 +1,54 @@
+name: Build Executables (Windows & Ubuntu)
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build Executable on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: Converter_PDF_para_Excel.exe
+            asset_name: Converter_PDF_para_Excel.exe
+          - os: ubuntu-latest
+            artifact_name: pdf-to-sheet-linux
+            asset_name: pdf-to-sheet-linux
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install pyinstaller
+          pip install -e .
+
+      - name: Build Executable with PyInstaller (Windows)
+        if: matrix.os == 'windows-latest'
+        run: |
+          pyinstaller --noconfirm --onefile --name Converter_PDF_para_Excel --distpath dist --collect-all pdfplumber --collect-all pypdfium2 --collect-all rich src/pdf_to_sheet/cli.py
+
+      - name: Build Executable with PyInstaller (Ubuntu)
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          pyinstaller --noconfirm --onefile --name pdf-to-sheet-linux --distpath dist --collect-all pdfplumber --collect-all pypdfium2 --collect-all rich src/pdf_to_sheet/cli.py
+          chmod +x dist/pdf-to-sheet-linux
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.asset_name }}
+          path: dist/${{ matrix.asset_name }}

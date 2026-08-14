@@ -15,7 +15,7 @@ A high-accuracy, privacy-focused Python CLI utility designed to convert complex 
   - **Tier 1 (Fast Rule-Based Parsing):** Uses deterministic libraries (such as `pdfplumber` or `camelot`) to quickly extract structured tables with explicit gridlines or consistent text positioning.
   - **Tier 2 (Local AI Fallback):** Integrates an offline, locally hosted AI model (e.g., via Ollama / local vision model) to recognize complex, borderless, or non-standard tables when rule-based parsing confidence is low.
 - **Offline & Private:** 100% local execution running on the host workstation. No external cloud service calls or sensitive data leakage.
-- **CLI Workflows:** Flexible command-line interface supporting both individual file conversion (`--file path/to/doc.pdf`) and batch directory processing (`--dir path/to/folder/`).
+- **CLI Workflows:** Flexible command-line interface supporting individual file conversion (`--file path/to/doc.pdf`), batch directory processing (`--dir path/to/folder/`), and extraction profile presets (`--profile generic` default for universal PDF tables or `--profile le_li` for industrial engineering sheets).
 - **Rich XLSX Output:**
   - Preserves tabular structure, aligned headers, and typed values (numbers, dates, currency, text).
   - Multi-sheet Excel workbook export featuring individual sheets per table/page alongside a consolidated summary sheet.

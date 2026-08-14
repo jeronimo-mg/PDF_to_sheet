@@ -54,9 +54,10 @@ def open_file_dialog() -> str | None:
 @click.option("--file", "-f", "pdf_file", type=click.Path(exists=True), help="Path to a single input PDF file.")
 @click.option("--dir", "-d", "pdf_dir", type=click.Path(exists=True), help="Path to directory containing PDF files for batch processing.")
 @click.option("--output", "-o", "output_path", type=click.Path(), help="Output XLSX file path or directory.")
+@click.option("--profile", "-p", default="generic", type=click.Choice(["generic", "le_li"], case_sensitive=False), help="Table extraction profile (generic or le_li).")
 @click.option("--gui", is_flag=True, help="Open native Windows GUI file selection dialog.")
 @click.option("--ollama-host", default="http://localhost:11434", help="Host URL for local Ollama service.")
-def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, gui: bool, ollama_host: str) -> None:
+def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, profile: str, gui: bool, ollama_host: str) -> None:
     """Convert PDF tables into Excel XLSX spreadsheets with hybrid rule-based and local AI vision extraction."""
     if gui or (not pdf_file and not pdf_dir):
         selected = open_file_dialog()
@@ -68,9 +69,9 @@ def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, gui
                 sys.exit(0)
 
     log_file = setup_logging()
-    logger.info("CLI execution started. File=%s, Dir=%s", pdf_file, pdf_dir)
+    logger.info("CLI execution started. File=%s, Dir=%s, Profile=%s", pdf_file, pdf_dir, profile)
 
-    console.print(Panel("[bold blue]PDF to Sheet Converter[/bold blue]\n[dim]Privacy-focused local PDF table extraction[/dim]", expand=False))
+    console.print(Panel(f"[bold blue]PDF to Sheet Converter[/bold blue]\n[dim]Privacy-focused local PDF table extraction (Profile: [cyan]{profile}[/cyan])[/dim]", expand=False))
 
     pdf_files: list[str] = []
     if pdf_file:
@@ -110,7 +111,7 @@ def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, gui
             else:
                 dest_xlsx = f"{os.path.splitext(pdf_path)[0]}.xlsx"
 
-            result = extractor.extract_tables(pdf_path)
+            result = extractor.extract_tables(pdf_path, profile=profile)
             if result.success and result.tables:
                 writer.write(result, dest_xlsx)
                 logger.info("Successfully converted %s -> %s (%d tables)", pdf_path, dest_xlsx, len(result.tables))

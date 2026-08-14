@@ -26,7 +26,7 @@ class LocalAIExtractor(BaseExtractor):
         self.host = host
         self.model = model
 
-    def extract_tables(self, pdf_path: str) -> ExtractionResult:
+    def extract_tables(self, pdf_path: str, profile: str = "generic") -> ExtractionResult:
         start_time = time.time()
         tables: list[TableData] = []
         warnings: list[str] = []

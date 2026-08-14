@@ -24,7 +24,7 @@ def test_merge_multiline_headers_2_rows() -> None:
 
 
 def test_clean_raw_table_rows() -> None:
-    raw_rows = [
+    raw_rows: list[list[str | None]] = [
         ["Rev.", "Identificação", None],
         [None, "Equipamento", "Número\n(TAG)"],
         ["1", "DESIONIZADOR\nCILINDRICO", "DZ-01"],
@@ -32,7 +32,7 @@ def test_clean_raw_table_rows() -> None:
         ["Título : ÍNDICE DE EQUIPAMENTOS", None, None],
     ]
 
-    cleaned_headers, data_rows = clean_raw_table_rows(raw_rows)
+    cleaned_headers, data_rows = clean_raw_table_rows(raw_rows, profile="le_li")
     assert cleaned_headers == ["Rev.", "Identificação / Equipamento", "Número (TAG)"]
     assert len(data_rows) == 1
     assert data_rows[0] == ["1", "DESIONIZADOR CILINDRICO", "DZ-01"]

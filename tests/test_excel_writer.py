@@ -4,11 +4,13 @@ import os
 
 import openpyxl
 
+from typing import Any
+
 from pdf_to_sheet.models import ExtractionResult, TableData
 from pdf_to_sheet.writers.excel import ExcelWriter
 
 
-def test_excel_writer_creates_xlsx(tmp_path) -> None:
+def test_excel_writer_creates_xlsx(tmp_path: Any) -> None:
     output_path = str(tmp_path / "output.xlsx")
 
     t1 = TableData(headers=["TAG", "QTY"], rows=[["P-101", "2"], ["P-102", "4"]], page_number=1)

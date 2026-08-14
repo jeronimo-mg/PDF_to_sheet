@@ -2,11 +2,13 @@
 
 import openpyxl
 
+from typing import Any
+
 from pdf_to_sheet.models import ExtractionResult, TableData
 from pdf_to_sheet.writers.excel import ExcelWriter
 
 
-def test_excel_writer_caps_max_column_width_and_enables_wrap_text(tmp_path) -> None:
+def test_excel_writer_caps_max_column_width_and_enables_wrap_text(tmp_path: Any) -> None:
     headers = ["Rev.", "Descricao Longa", "Tag"]
     long_text = "X" * 300  # 300 characters long string
     row = ["1", long_text, "2151-TC01"]

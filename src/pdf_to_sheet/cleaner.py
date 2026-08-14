@@ -1,5 +1,6 @@
 """Cleaner module for multi-row header merging, cell text sanitization, and footer filtering."""
 
+import re
 from typing import Any
 
 
@@ -116,8 +117,62 @@ def merge_multiline_headers(rows: list[list[str | None]]) -> tuple[list[str], in
     return r0, 1
 
 
-def clean_raw_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], list[list[str]]]:
-    """Clean raw table rows: preprocess mixed headers, merge multi-line headers, strip linebreaks, and filter footers."""
+def is_generic_footer_row(row: list[str | None]) -> bool:
+    """Check if a table row represents a generic page number or simple footer line."""
+    text_line = " ".join([clean_cell_text(c) for c in row if c]).strip()
+    if not text_line:
+        return False
+    page_patterns = [
+        r"^p[áa]gina\s+\d+(\s+de\s+\d+)?$",
+        r"^page\s+\d+(\s+of\s+\d+)?$",
+        r"^\d+\s+of\s+\d+$",
+        r"^\d+\s+de\s+\d+$",
+    ]
+    for pat in page_patterns:
+        if re.match(pat, text_line.lower()):
+            return True
+    return False
+
+
+def clean_generic_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], list[list[str]]]:
+    """Generic clean for raw table rows: strip linebreaks, filter generic footers, extract headers without domain mutations."""
+    if not raw_rows:
+        return [], []
+
+    cleaned_rows: list[list[str]] = []
+    for r in raw_rows:
+        if is_generic_footer_row(r):
+            continue
+        c_row = [clean_cell_text(c) for c in r]
+        if any(cell != "" for cell in c_row):
+            cleaned_rows.append(c_row)
+
+    if not cleaned_rows:
+        return [], []
+
+    raw_headers = cleaned_rows[0]
+    clean_headers = list(raw_headers)
+    while clean_headers and not clean_headers[-1].strip():
+        clean_headers.pop()
+
+    if not clean_headers:
+        return [], []
+
+    num_cols = len(clean_headers)
+    data_rows: list[list[str]] = []
+
+    for item_row in cleaned_rows[1:]:
+        row_data: list[str] = list(item_row[:num_cols])
+        while len(row_data) < num_cols:
+            row_data.append("")
+        if any(cell != "" for cell in row_data):
+            data_rows.append(row_data)
+
+    return clean_headers, data_rows
+
+
+def clean_le_li_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], list[list[str]]]:
+    """Clean raw table rows specifically for LE/LI domain: preprocess mixed headers, merge multi-line headers, strip linebreaks, filter footers."""
     if not raw_rows:
         return [], []
 
@@ -130,10 +185,8 @@ def clean_raw_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], l
             continue
 
         cleaned_row = [clean_cell_text(c) for c in r]
-        # Drop trailing None/empty columns if they extend past headers count
         if len(cleaned_row) > len(headers):
             cleaned_row = cleaned_row[: len(headers)]
-        # Pad row if shorter than headers
         while len(cleaned_row) < len(headers):
             cleaned_row.append("")
 
@@ -141,6 +194,17 @@ def clean_raw_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str], l
             data_rows.append(cleaned_row)
 
     return sanitize_table_rows(headers, data_rows)
+
+
+def clean_raw_table_rows(raw_rows: list[list[str | None]], profile: str = "generic") -> tuple[list[str], list[list[str]]]:
+    """Dispatch table cleaning strategy based on profile ('generic' or 'le_li')."""
+    if not raw_rows:
+        return [], []
+
+    if profile.lower() == "le_li":
+        return clean_le_li_table_rows(raw_rows)
+
+    return clean_generic_table_rows(raw_rows)
 
 
 def merge_adjacent_item_rows(rows: list[list[str]], num_cols: int) -> list[list[str]]:

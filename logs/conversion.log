@@ -34,3 +34,5 @@
 2026-08-13 14:26:56,706 [INFO] Successfully converted R11.01-2151-LI-0001_3-1.pdf -> LI_output.xlsx (15 tables)
 2026-08-13 14:28:48,175 [INFO] CLI execution started. File=R11.01-2151-LI-0001_3-1.pdf, Dir=None
 2026-08-13 14:29:00,342 [INFO] Successfully converted R11.01-2151-LI-0001_3-1.pdf -> LI_output.xlsx (15 tables)
+2026-08-13 14:32:35,785 [INFO] CLI execution started. File=H:/documents/pessoal/projetos/PDF_to_sheet/R11.01-2151-LI-0001_3-1.pdf, Dir=None
+2026-08-13 14:32:47,734 [INFO] Successfully converted H:/documents/pessoal/projetos/PDF_to_sheet/R11.01-2151-LI-0001_3-1.pdf -> H:/documents/pessoal/projetos/PDF_to_sheet/R11.01-2151-LI-0001_3-1.xlsx (15 tables)

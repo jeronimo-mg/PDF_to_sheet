@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class RuleBasedExtractor(BaseExtractor):
     """Deterministic PDF table extractor using pdfplumber with camelot fallback."""
 
-    def extract_tables(self, pdf_path: str) -> ExtractionResult:
+    def extract_tables(self, pdf_path: str, profile: str = "generic") -> ExtractionResult:
         start_time = time.time()
         tables: list[TableData] = []
         warnings: list[str] = []
@@ -44,7 +44,7 @@ class RuleBasedExtractor(BaseExtractor):
                         if not raw_table or len(raw_table) == 0:
                             continue
 
-                        headers, data_rows = clean_raw_table_rows(raw_table)
+                        headers, data_rows = clean_raw_table_rows(raw_table, profile=profile)
 
                         if not headers or not data_rows:
                             continue

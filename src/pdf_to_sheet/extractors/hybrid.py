@@ -19,12 +19,12 @@ class HybridTableExtractor(BaseExtractor):
         self.ai_extractor = LocalAIExtractor(host=ollama_host)
         self.ollama_host = ollama_host
 
-    def extract_tables(self, pdf_path: str) -> ExtractionResult:
+    def extract_tables(self, pdf_path: str, profile: str = "generic") -> ExtractionResult:
         start_time = time.time()
         warnings: list[str] = []
 
         # Tier 1: Deterministic Rule-Based Extraction
-        rule_result = self.rule_extractor.extract_tables(pdf_path)
+        rule_result = self.rule_extractor.extract_tables(pdf_path, profile=profile)
         tables = rule_result.tables
 
         # Check if Tier 1 provided satisfactory tables
@@ -33,7 +33,7 @@ class HybridTableExtractor(BaseExtractor):
         if not is_satisfactory:
             logger.info("Rule-based extraction returned low confidence/no tables. Attempting local AI vision fallback...")
             if check_ollama_status(self.ollama_host):
-                ai_result = self.ai_extractor.extract_tables(pdf_path)
+                ai_result = self.ai_extractor.extract_tables(pdf_path, profile=profile)
                 if ai_result.tables:
                     tables = ai_result.tables
                     warnings.append("Used Local AI Vision fallback extraction.")

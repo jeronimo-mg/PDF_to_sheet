@@ -18,8 +18,9 @@ Toda a execução é realizada **100% localmente no seu computador**, sem depend
   * **Nível 1 (Determinístico / Regras)**: Utiliza `pdfplumber` e `camelot` para extração rápida e precisa de tabelas vetoriais e com grades definidas.
   * **Nível 2 (IA Local / Visão - Fallback)**: Integração opcional com modelos locais de visão computacional via **Ollama** (ex: `llama3.2-vision`) para reconhecer tabelas complexas ou sem bordas quando a extração determinística falha.
 * 🎯 **Perfis de Extração Selecionáveis (`--profile`)**:
-  * `generic` *(Padrão)*: Extração universal para qualquer tipo de tabela em PDF. Preserva 100% da estrutura original de colunas sem suposições de domínio.
-  * `le_li`: Perfil otimizado para documentos técnicos de engenharia industrial (Listas de Equipamentos e Instrumentos), realizando fusão automática de sub-cabeçalhos, tratamento de revisões e propagação de TAGs.
+  * `auto` *(Padrão Inteligente)*: Detecta automaticamente o formato do documento. Se encontrar termos de engenharia LE/LI (`SISTEMA`, `INSTRUM.`, `EQUIPAMENTO`), ativa o alinhamento de colunas especializado. Caso contrário, aplica a limpeza neutra universal.
+  * `generic`: Força a extração universal neutra para qualquer tipo de tabela em PDF sem assumir regras de domínio.
+  * `le_li`: Força o perfil otimizado para documentos técnicos de engenharia industrial (Listas de Equipamentos LE e Instrumentos LI).
 * 🖥️ **Interface Gráfica Nativa (GUI)**:
   * Permite selecionar arquivos via caixa de diálogo do Windows com opção `--gui` ou dando duplo clique no executável `Converter_PDF_para_Excel.bat`.
 * 🤖 **Servidor MCP Integrado (Model Context Protocol)**:
@@ -61,7 +62,7 @@ Toda a execução é realizada **100% localmente no seu computador**, sem depend
 
 ### 1. Converter um Arquivo PDF Único
 ```bash
-# Usa o perfil genérico universal (padrão)
+# Usa a detecção automática de perfil (padrão inteligente)
 pdf-to-sheet --file documento.pdf --output resultado.xlsx
 
 # Ou usando o módulo python diretamente
@@ -76,10 +77,13 @@ pdf-to-sheet --dir ./pasta_de_pdfs/ --output ./saida_excel/
 
 ### 3. Especificando Perfis de Extração (`--profile`)
 ```bash
-# Perfil Genérico (Universal para faturas, notas, relatórios finaceiros, etc.)
+# Modo Automático (Padrão: detecta LE/LI ou Genérico automaticamente)
+pdf-to-sheet -f documento.pdf --profile auto
+
+# Forçar Perfil Genérico (Universal para faturas, notas, relatórios financeiros, etc.)
 pdf-to-sheet -f extrato.pdf --profile generic
 
-# Perfil LE/LI (Documentos de Engenharia / Lista de Equipamentos e Instrumentos)
+# Forçar Perfil LE/LI (Documentos de Engenharia / Lista de Equipamentos e Instrumentos)
 pdf-to-sheet -f R11.01-2151-LE-0001_2.pdf --profile le_li
 ```
 

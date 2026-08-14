@@ -1,7 +1,6 @@
 """Unit tests for Desktop Commander compatible MCP server module."""
 
 import os
-
 from typing import Any
 
 from pdf_to_sheet.mcp_server import handle_mcp_tool_call

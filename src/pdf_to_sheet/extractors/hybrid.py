@@ -19,7 +19,7 @@ class HybridTableExtractor(BaseExtractor):
         self.ai_extractor = LocalAIExtractor(host=ollama_host)
         self.ollama_host = ollama_host
 
-    def extract_tables(self, pdf_path: str, profile: str = "generic") -> ExtractionResult:
+    def extract_tables(self, pdf_path: str, profile: str = "auto") -> ExtractionResult:
         start_time = time.time()
         warnings: list[str] = []
 

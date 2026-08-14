@@ -52,6 +52,6 @@ class BaseExtractor(ABC):
     """Abstract base class for table extraction strategies."""
 
     @abstractmethod
-    def extract_tables(self, pdf_path: str, profile: str = "generic") -> ExtractionResult:
+    def extract_tables(self, pdf_path: str, profile: str = "auto") -> ExtractionResult:
         """Extract tables from the specified PDF file using the given profile."""
 

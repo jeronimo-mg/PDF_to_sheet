@@ -196,12 +196,30 @@ def clean_le_li_table_rows(raw_rows: list[list[str | None]]) -> tuple[list[str],
     return sanitize_table_rows(headers, data_rows)
 
 
-def clean_raw_table_rows(raw_rows: list[list[str | None]], profile: str = "generic") -> tuple[list[str], list[list[str]]]:
-    """Dispatch table cleaning strategy based on profile ('generic' or 'le_li')."""
+def is_le_li_table_raw(raw_rows: list[list[str | None]]) -> bool:
+    """Check if raw table rows contain LE/LI domain keywords (SISTEMA, INSTRUM., TAG, EQUIPAMENTO, REV., etc.)."""
+    if not raw_rows:
+        return False
+    sample_text = " ".join([
+        clean_cell_text(c).upper()
+        for r in raw_rows[:5]
+        for c in r
+        if c
+    ])
+    le_li_keywords = ["SISTEMA", "INSTRUM.", "INSTRUM", "EQUIPAMENTO", "TAG", "FLUXOGRAMA", "Nº. CLIENTE", "DOCUMENTOS DE REFERÊNCIA"]
+    return any(kw in sample_text for kw in le_li_keywords)
+
+
+def clean_raw_table_rows(raw_rows: list[list[str | None]], profile: str = "auto") -> tuple[list[str], list[list[str]]]:
+    """Dispatch table cleaning strategy based on profile ('auto', 'generic', or 'le_li')."""
     if not raw_rows:
         return [], []
 
-    if profile.lower() == "le_li":
+    selected_profile = profile.lower()
+    if selected_profile == "auto":
+        selected_profile = "le_li" if is_le_li_table_raw(raw_rows) else "generic"
+
+    if selected_profile == "le_li":
         return clean_le_li_table_rows(raw_rows)
 
     return clean_generic_table_rows(raw_rows)

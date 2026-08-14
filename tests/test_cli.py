@@ -1,7 +1,6 @@
 """CLI unit tests using Click CliRunner."""
 
 import os
-
 from typing import Any
 
 from click.testing import CliRunner
@@ -31,5 +30,5 @@ def test_cli_profile_help() -> None:
     result = runner.invoke(main, ["--help"])
     assert result.exit_code == 0
     assert "--profile" in result.output
-    assert "[generic|le_li]" in result.output
+    assert "[auto|generic|le_li]" in result.output
 

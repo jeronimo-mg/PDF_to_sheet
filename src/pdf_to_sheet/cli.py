@@ -54,7 +54,7 @@ def open_file_dialog() -> str | None:
 @click.option("--file", "-f", "pdf_file", type=click.Path(exists=True), help="Path to a single input PDF file.")
 @click.option("--dir", "-d", "pdf_dir", type=click.Path(exists=True), help="Path to directory containing PDF files for batch processing.")
 @click.option("--output", "-o", "output_path", type=click.Path(), help="Output XLSX file path or directory.")
-@click.option("--profile", "-p", default="generic", type=click.Choice(["generic", "le_li"], case_sensitive=False), help="Table extraction profile (generic or le_li).")
+@click.option("--profile", "-p", default="auto", type=click.Choice(["auto", "generic", "le_li"], case_sensitive=False), help="Table extraction profile (auto, generic, or le_li).")
 @click.option("--gui", is_flag=True, help="Open native Windows GUI file selection dialog.")
 @click.option("--ollama-host", default="http://localhost:11434", help="Host URL for local Ollama service.")
 def main(pdf_file: str | None, pdf_dir: str | None, output_path: str | None, profile: str, gui: bool, ollama_host: str) -> None:

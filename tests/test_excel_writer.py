@@ -1,10 +1,9 @@
 """Unit tests for ExcelWriter module."""
 
 import os
+from typing import Any
 
 import openpyxl
-
-from typing import Any
 
 from pdf_to_sheet.models import ExtractionResult, TableData
 from pdf_to_sheet.writers.excel import ExcelWriter

@@ -1,8 +1,8 @@
 """Unit tests for Excel formatting (max column width capping and text wrapping)."""
 
-import openpyxl
-
 from typing import Any
+
+import openpyxl
 
 from pdf_to_sheet.models import ExtractionResult, TableData
 from pdf_to_sheet.writers.excel import ExcelWriter

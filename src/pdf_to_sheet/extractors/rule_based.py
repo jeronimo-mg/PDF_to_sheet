@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 class RuleBasedExtractor(BaseExtractor):
     """Deterministic PDF table extractor using pdfplumber with camelot fallback."""
 
-    def extract_tables(self, pdf_path: str, profile: str = "generic") -> ExtractionResult:
+    def extract_tables(self, pdf_path: str, profile: str = "auto") -> ExtractionResult:
         start_time = time.time()
         tables: list[TableData] = []
         warnings: list[str] = []
